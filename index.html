@@ -7,6 +7,7 @@
             background-color: #012;
             color: #eef;
             font-family: Arial, sans-serif;
+            margin: 0;
         }
 
         table {
@@ -48,7 +49,7 @@
     </div>
     <div id="controls"><p id="progress"></p><button onclick="stop()">stop</button></div>
     <script>
-        const FILE_COUNT = 6;
+        const FILE_COUNT = 9;
 
         let jsonData = []; 
  
@@ -82,26 +83,39 @@
             clearInterval(interval);
         }
 
-        function game(result,full,half) {
+        function game(result,full,half,wager=1.00) {
             let winnings = 0;
             if(half === 1.00) {
                 if(result >= full) {
-                    winnings += full;
+                    winnings += wager*full;
                 }
             } else {
                 if(result >= half) {
-                    winnings += half/2;
+                    winnings += 0.5 * half * wager;
                 }
                 if(result >= full) {
-                    winnings += (full-winnings) /2;
+                    winnings += 0.5 * full * wager;
                 }
             }
 
-            // round up to nearest hundredth
-            winnings = Math.ceil(winnings * 100) / 100;
+
+            // round down to nearest cent
+            winnings = Math.floor(winnings * 100) / 100;
 
             return winnings;
         }
+
+        // function assert(full,half,wager,result) {
+        //     let a = game(10000,full,half,wager);
+        //     if(a !== result) {
+        //         console.warn('game result incorrect:',a,result);
+        //     }
+        // }
+
+        // assert(1.45,1,2.67,3.87);
+        // assert(1.4,1,0.15,0.21);
+        // assert(1.39,1,1.23,1.70);
+        // assert(1.37,1,0.27,0.36);
 
         function color(result) {
             let r = 0;
@@ -130,7 +144,7 @@
         function* genStrategies() {
             for(var full = 1.01; full < 100; full += 0.01) {
                 full = Math.ceil(full * 100) / 100;
-                for(var half = 1.00; half < full; half += 0.01) {
+                for(var half = 1.00; half < full-0.001; half += 0.01) {
                     half = Math.ceil(half * 100) / 100;
                     let winnings = 0;
                     for( let i = 0; i < results.length; i++ ) {
